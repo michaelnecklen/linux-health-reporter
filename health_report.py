@@ -22,28 +22,34 @@ def get_disk_status(percent_used):
     else:
         return "OK"
 
-hostname = socket.gethostname()
-kernel_version = platform.release()
-python_version = platform.python_version()
-uptime = get_uptime()
-disk = shutil.disk_usage("/")
-disk_total = bytes_to_gib(disk.total)
-disk_used = bytes_to_gib(disk.used)
-disk_available = bytes_to_gib(disk.free)
-disk_percent = disk.used / (disk.used + disk.free) * 100
-disk_status = get_disk_status(disk_percent)
 
-print("Linux System Health Report")
-print("==========================")
-print(f"Hostname:  {hostname}")
-print(f"Kernel:    {kernel_version}")
-print(f"Python:    {python_version}")
-print(f"Uptime:    {uptime}")
-print()
-print("Root Filesystem")
-print("---------------")
-print(f"Total:        {disk_total:.1f} GiB")
-print(f"Used:         {disk_used:.1f} GiB")
-print(f"Available:    {disk_available:.1f} GiB")
-print(f"Utilized:     {disk_percent:.1f}%")
-print(f"Status:       {disk_status}")
+def main():
+    hostname = socket.gethostname()
+    kernel_version = platform.release()
+    python_version = platform.python_version()
+    uptime = get_uptime()
+    disk = shutil.disk_usage("/")
+    disk_total = bytes_to_gib(disk.total)
+    disk_used = bytes_to_gib(disk.used)
+    disk_available = bytes_to_gib(disk.free)
+    disk_percent = disk.used / (disk.used + disk.free) * 100
+    disk_status = get_disk_status(disk_percent)
+
+    print("Linux System Health Report")
+    print("==========================")
+    print(f"Hostname:  {hostname}")
+    print(f"Kernel:    {kernel_version}")
+    print(f"Python:    {python_version}")
+    print(f"Uptime:    {uptime}")
+    print()
+    print("Root Filesystem")
+    print("---------------")
+    print(f"Total:        {disk_total:.1f} GiB")
+    print(f"Used:         {disk_used:.1f} GiB")
+    print(f"Available:    {disk_available:.1f} GiB")
+    print(f"Utilized:     {disk_percent:.1f}%")
+    print(f"Status:       {disk_status}")
+
+
+if __name__ == "__main__":
+    main()
