@@ -10,11 +10,13 @@ def get_uptime():
     return timedelta(seconds=int(uptime_seconds))
 
 hostname = socket.gethostname()
+kernel_version = platform.release()
 python_version = platform.python_version()
 uptime = get_uptime()
 
 print("Linux System Health Report")
 print("==========================")
 print(f"Hostname:  {hostname}")
+print(f"Kernel:    {kernel_version}")
 print(f"Python:    {python_version}")
 print(f"Uptime:    {uptime}")
