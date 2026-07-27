@@ -15,6 +15,8 @@ def bytes_to_gib(byte_count):
 
 
 def get_disk_status(percent_used):
+    if not 0 <= percent_used <= 100:
+        raise ValueError("percent_used must be between 0 and 100")
     if percent_used >= 90:
         return "CRITICAL"
     elif percent_used >= 80:

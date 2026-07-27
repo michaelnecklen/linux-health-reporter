@@ -20,6 +20,9 @@ operations using only the Python standard library.
 - Classifies utilization as `OK`, `WARNING`, or `CRITICAL`.
 - Runs safely as a script without producing report output when imported.
 - Requires no third-party Python packages.
+- Rejects disk-percentage values outside the valid 0–100 range.
+- Includes automated tests for conversion, thresholds, boundaries, and invalid
+  values.
 
 ## Example Output
 
@@ -82,15 +85,17 @@ linux-health-reporter/
 ├── README.md
 ├── docs/
 │   └── DEVELOPMENT_SETUP.md
-└── notes/
-    ├── health_report_checkpoint_01_annotated.py
-    └── LEARNING_JOURNAL.md
+├── notes/
+│   ├── health_report_checkpoint_01_annotated.py
+│   └── LEARNING_JOURNAL.md
+└── tests/
+    └── test_health_report.py
 ```
 
 - `health_report.py` contains the clean executable program.
 - `docs/` contains project setup documentation.
-- `notes/` preserves the annotated checkpoint and evidence-based learning
-  journal.
+- `notes/` preserves the annotated checkpoint and evidence-based learning journal.
+- `tests/` contains the automated `unittest` suite.
 
 ## How It Works
 
@@ -98,7 +103,8 @@ linux-health-reporter/
 2. `get_uptime()` converts raw uptime seconds into a readable duration.
 3. `bytes_to_gib()` converts filesystem byte counts into GiB.
 4. The program calculates root-filesystem utilization as a percentage.
-5. `get_disk_status()` classifies utilization using ordered thresholds.
+5. `get_disk_status()` validates the percentage and classifies it using ordered
+   thresholds.
 6. `main()` coordinates data collection, processing, and presentation.
 7. The entry guard runs `main()` only when the file is executed directly.
 
@@ -128,22 +134,25 @@ Check pending Git changes for whitespace errors:
 git diff --check
 ```
 
+Run the automated test suite:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## Current Limitations
 
 - The uptime implementation depends on Linux's `/proc/uptime`.
 - Only the filesystem mounted at `/` is reported.
 - Status thresholds are currently fixed at 80% and 90%.
-- `get_disk_status()` assumes its percentage argument is within the valid
-  0–100 range.
+- The program currently prints text only and has no command-line options,
+  structured output, or logging.
 - Utilization is calculated from used plus free space and may differ from tools
   that account for reserved filesystem blocks differently.
-- The program currently prints text only and has no command-line options,
-  structured output, logging, or automated test suite.
 
 ## Roadmap
 
-- Add automated tests for conversion and status-classification functions.
-- Validate percentage inputs and test failure behavior.
+- Expand automated coverage to uptime collection and report coordination.
 - Add command-line options for filesystem paths and custom thresholds.
 - Add structured output such as JSON for use by other tools.
 - Return meaningful process exit codes for monitoring and automation.
