@@ -99,3 +99,82 @@ understanding—not merely record completed commands.
   functions and validation for percentages outside the valid 0–100 range.
 - Build a reusable project launcher later as a separate Bash automation
   exercise.
+
+## Checkpoint 02 — Automated Tests and Input Validation
+
+**Checkpoint commit:** `711e3d1`
+**Completed:** July 27, 2026
+
+### What I Built
+
+- Added an automated test suite using Python's built-in `unittest` module.
+- Added three tests for `bytes_to_gib()` and eight tests for
+  `get_disk_status()`.
+- Added input validation that raises `ValueError` when a percentage is below
+  `0` or above `100`.
+- Preserved valid boundary behavior at exactly `0` and `100`.
+- Updated the public README to document testing, validation, project structure,
+  verification commands, current limitations, and the revised roadmap.
+
+### What the Tests Prove
+
+- All eleven specified conversion, classification, boundary, and invalid-input
+  examples currently produce their expected outcomes.
+- `bytes_to_gib()` returns the expected GiB values for zero bytes, half a GiB,
+  and one GiB.
+- `get_disk_status()` changes classification at the intended 80% and 90%
+  thresholds while accepting valid endpoints at 0% and 100%.
+- Values below 0% and above 100% raise `ValueError` instead of receiving a
+  misleading health classification.
+- Rerunning the complete suite provides regression evidence that new validation
+  did not break the previously tested behavior.
+- These tests cover the behaviors we specified; they do not prove that the
+  entire program contains no other defects.
+
+### Red-to-Green Lesson
+
+- Write a test for the desired behavior before implementing it.
+- Run the test and confirm that it fails for the expected reason. This is the
+  red stage and proves the missing behavior is detectable.
+- Add the smallest production-code change that should satisfy the requirement.
+- Rerun the complete suite. When every expected behavior passes, the suite is
+  green.
+- A failing test can expose either a production-code defect or a defective test.
+  The `100.0` test was wrong because 100 is a valid endpoint; `100.1` correctly
+  represents an invalid value above the range.
+- `py_compile` checks whether Python can compile the source, while `unittest`
+  executes specified behaviors and compares actual results with expected
+  results.
+
+### Corrections That Improved My Understanding
+
+- The complete line `disk_used = bytes_to_gib(disk.used)` is an assignment
+  statement. Only `bytes_to_gib(disk.used)` is the function call, and
+  `disk_used` is the variable receiving the returned value.
+- Parameter names appear in function definitions, not necessarily at call
+  sites. `byte_count` is the parameter in the definition, while `disk.used` is
+  the argument supplied by position during the call.
+- Byte conversion and percentage calculation are separate operations.
+  `byte_count / (1024 ** 3)` converts bytes to GiB, while
+  `disk.used / (disk.used + disk.free) * 100` calculates utilization percent.
+
+### Repetition Queue
+
+- Trace assignment statements by evaluating the right-hand function call first,
+  following its returned value, and identifying the left-hand receiving variable.
+- Repeatedly match call-site arguments to definition-site parameters.
+- Distinguish the outer `assertEqual()` method call from a nested function call
+  used as its actual-value argument.
+- Practice reading `unittest` classes, test methods, `self`, `assertEqual()`,
+  and `assertRaises()`.
+- Keep byte-to-GiB conversion separate from utilization-percentage calculation.
+- Repeat the red-to-green cycle and diagnose whether a failure belongs to the
+  production code or the test.
+
+### Next Steps
+
+- Commit and publish the Checkpoint 02 journal entry.
+- Expand automated coverage to `get_uptime()` without depending on Serval's
+  current uptime.
+- Learn how test doubles and mocking can provide controlled filesystem data.
+- Later add automated test execution on GitHub and continue the project roadmap.
