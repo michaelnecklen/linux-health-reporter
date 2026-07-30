@@ -21,8 +21,8 @@ operations using only the Python standard library.
 - Runs safely as a script without producing report output when imported.
 - Requires no third-party Python packages.
 - Rejects disk-percentage values outside the valid 0–100 range.
-- Includes automated tests for conversion, thresholds, boundaries, and invalid
-  values.
+- Includes automated tests for controlled uptime parsing, conversion, thresholds,
+  boundaries, and invalid values.
 
 ## Example Output
 
@@ -152,7 +152,8 @@ python -m unittest discover -s tests -v
 
 ## Roadmap
 
-- Expand automated coverage to uptime collection and report coordination.
+- Expand automated coverage to report coordination and system-data failure
+  paths.
 - Add command-line options for filesystem paths and custom thresholds.
 - Add structured output such as JSON for use by other tools.
 - Return meaningful process exit codes for monitoring and automation.

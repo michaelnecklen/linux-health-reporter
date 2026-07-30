@@ -1,6 +1,17 @@
+from datetime import timedelta
 import unittest
+from unittest.mock import patch
 
-from health_report import bytes_to_gib, get_disk_status
+from health_report import bytes_to_gib, get_disk_status, get_uptime
+
+
+class TestGetUptime(unittest.TestCase):
+    def test_controlled_uptime_text_returns_expected_duration(self):
+        with patch(
+            "health_report.Path.read_text",
+            return_value="3661.75 99999.00\n",
+        ):
+            self.assertEqual(get_uptime(), timedelta(seconds=3661))
 
 
 class TestBytesToGib(unittest.TestCase):
