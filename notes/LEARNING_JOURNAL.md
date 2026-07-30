@@ -178,3 +178,92 @@ understanding—not merely record completed commands.
   current uptime.
 - Learn how test doubles and mocking can provide controlled filesystem data.
 - Later add automated test execution on GitHub and continue the project roadmap.
+
+## Checkpoint 03 — Controlled Uptime Testing with Mocking
+
+**Checkpoint commit:** `bec066e`
+**Completed:** July 30, 2026
+
+### What I Built
+
+- Added `TestGetUptime` and a controlled test for `get_uptime()`.
+- Used `unittest.mock.patch` to temporarily replace
+  `health_report.Path.read_text`.
+- Supplied the controlled string `"3661.75 99999.00\n"` instead of reading
+  Serval's changing `/proc/uptime` data.
+- Verified that the real parsing and conversion logic returns
+  `timedelta(seconds=3661)`, displayed as `1:01:01`.
+- Increased the automated suite from eleven to twelve passing tests without
+  changing production behavior.
+- Updated the public README to describe controlled uptime coverage and revise
+  the testing roadmap.
+
+### What Mocking Means
+
+- Mocking temporarily substitutes controlled behavior for a real dependency
+  during a test.
+- `patch()` does not edit `health_report.py`, `/proc/uptime`, or any file on
+  disk; the substitution exists only in the running Python process.
+- The production function still creates `Path("/proc/uptime")`, but the patched
+  `read_text()` method intercepts the read and returns controlled text.
+- The replacement is active only inside the indented `with patch(...):` block.
+  The real method is restored automatically when that block exits.
+- Patch the dependency where the production module looks it up, which is why
+  the target is `health_report.Path.read_text`.
+- Mocking makes tests deterministic, isolates external dependencies, and avoids
+  changing the real system merely to create a test condition.
+
+### Controlled Data Flow
+
+1. The patched `read_text()` method returns the controlled string
+   `"3661.75 99999.00\n"`.
+2. `.split()` produces the list `["3661.75", "99999.00"]`.
+3. `[0]` selects the string `"3661.75"`.
+4. `float()` converts that string to the float `3661.75`.
+5. `int()` discards the fractional part and returns the integer `3661`.
+6. `timedelta(seconds=3661)` creates a duration displayed as `1:01:01`.
+7. `assertEqual()` compares the actual duration returned by `get_uptime()` with
+   the expected `timedelta(seconds=3661)` object.
+8. Matching objects allow the assertion to continue; unequal objects raise an
+   assertion failure.
+
+### Debugging Lessons
+
+- Test-only imports belong in `tests/test_health_report.py`, not in the
+  production module.
+- Importing `health_report` from inside `health_report.py` caused the module to
+  import itself before its function definitions existed, producing a
+  partially-initialized-module circular import error.
+- `py_compile` accepted the code because the import statement was valid syntax;
+  the failure appeared only when Python executed the import during testing.
+- After removing the self-import, the test module also needed to import
+  `get_uptime` alongside the other tested helper functions.
+- VS Code diagnostics indicated that something was wrong, while the traceback
+  identified the runtime path and failure reason.
+- Running `git diff` after cleanup proved that production code was restored and
+  only the intended test and README changes remained.
+- Careful error reading, file inspection, correction, and retesting allowed me
+  to diagnose and repair the mistakes rather than merely copy a fix.
+
+### Repetition Queue
+
+- Distinguish a value from its type: `3661.75` is a value of type `float`, while
+  `3661` is a value of type `int`.
+- Remember that `.split()` returns a list and that quoted elements inside the
+  list remain strings.
+- Practice identifying what a mock replaces, what controlled value it returns,
+  where the patch target is looked up, and when restoration occurs.
+- Trace nested calls inside `assertEqual(actual, expected)` without treating the
+  assertion as returning the expected value.
+- Reinforce the difference between syntax validation, runtime execution,
+  editor diagnostics, tracebacks, and automated behavioral tests.
+- Practice recognizing self-imports and partially initialized modules from
+  circular-import tracebacks.
+
+### Next Steps
+
+- Commit and publish the Checkpoint 03 journal entry.
+- Verify that the patched `read_text()` method was called as expected.
+- Test controlled malformed uptime data and its failure behavior.
+- Expand automated coverage to report coordination and formatted output.
+- Add automatic test execution on GitHub later in the project.
