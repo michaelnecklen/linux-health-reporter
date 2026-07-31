@@ -1,0 +1,27 @@
+@media print {
+    pre {
+        break-before: avoid-page;
+        break-inside: avoid;
+        page-break-before: avoid;
+        page-break-inside: avoid;
+    }
+
+    p:has(+ pre) {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
+
+    h1,
+    h2,
+    h3 {
+        break-after: avoid-page;
+        page-break-after: avoid;
+    }
+
+    h1 + *,
+    h2 + *,
+    h3 + * {
+        break-before: avoid-page;
+        page-break-before: avoid;
+    }
+}

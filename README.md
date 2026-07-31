@@ -87,7 +87,8 @@ linux-health-reporter/
 ├── README.md
 ├── docs/
 │   ├── DEVELOPMENT_SETUP.md
-│   └── GIT_WORKFLOW.md
+│   ├── GIT_WORKFLOW.md
+│   └── PRINT.css
 ├── notes/
 │   ├── health_report_checkpoint_01_annotated.py
 │   └── LEARNING_JOURNAL.md
@@ -96,7 +97,8 @@ linux-health-reporter/
 ```
 
 - `health_report.py` contains the clean executable program.
-- `docs/` contains project setup documentation.
+- `docs/` contains project setup documentation, the Git workflow guide, and its
+  print stylesheet.
 - `notes/` preserves the annotated checkpoint and evidence-based learning journal.
 - `tests/` contains the automated `unittest` suite.
 
