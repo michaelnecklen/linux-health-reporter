@@ -74,8 +74,10 @@ source .venv/bin/activate
 python health_report.py
 ```
 
-The development environment and VS Code setup are documented in
-[`docs/DEVELOPMENT_SETUP.md`](docs/DEVELOPMENT_SETUP.md).
+Additional documentation:
+
+- [Development environment and VS Code setup](docs/DEVELOPMENT_SETUP.md)
+- [Git and GitHub working guide](docs/GIT_WORKFLOW.md)
 
 ## Project Structure
 
@@ -84,7 +86,8 @@ linux-health-reporter/
 ├── health_report.py
 ├── README.md
 ├── docs/
-│   └── DEVELOPMENT_SETUP.md
+│   ├── DEVELOPMENT_SETUP.md
+│   └── GIT_WORKFLOW.md
 ├── notes/
 │   ├── health_report_checkpoint_01_annotated.py
 │   └── LEARNING_JOURNAL.md
