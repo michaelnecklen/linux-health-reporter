@@ -10,8 +10,11 @@ class TestGetUptime(unittest.TestCase):
         with patch(
             "health_report.Path.read_text",
             return_value="3661.75 99999.00\n",
-        ):
-            self.assertEqual(get_uptime(), timedelta(seconds=3661))
+        ) as mock_read_text:
+            result = get_uptime()
+
+            self.assertEqual(result, timedelta(seconds=3661))
+            mock_read_text.assert_called_once_with()
 
 
 class TestBytesToGib(unittest.TestCase):
