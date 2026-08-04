@@ -352,3 +352,101 @@ understanding—not merely record completed commands.
   and error messages.
 - Expand automated coverage to report coordination and formatted output.
 - Add automatic test execution on GitHub later in the project.
+
+## Checkpoint 05 — Malformed Uptime Data Validation
+
+**Checkpoint commit:** `7213d25`
+**Completed:** August 4, 2026
+
+### What I Built
+
+- Added controlled tests for empty and nonnumeric `/proc/uptime` text.
+- Increased the automated suite from twelve to fourteen passing tests.
+- Added `uptime_parts` to store the list returned by `.split()`.
+- Added explicit empty-list validation before selecting the first uptime value.
+- Changed empty uptime data from an accidental `IndexError` into a deliberate
+  `ValueError` with the message `invalid uptime data`.
+- Preserved valid uptime parsing, live report execution, and import-guard
+  behavior.
+- Updated the public README to document validation, malformed-data tests, and
+  the remaining lack of a user-friendly command-level failure message.
+
+### Controlled Failure Paths
+
+- Empty controlled text follows this path:
+
+  ```text
+  "" → split() → [] → empty-list validation → ValueError
+  ```
+
+  The explicit validation stops execution before `[0]`, `float()`, or
+  `timedelta()` is reached.
+
+- Nonnumeric controlled text follows this path:
+
+  ```text
+  "not-a-number 99999.00\n" → split() → ["not-a-number", "99999.00"] → [0] → "not-a-number"
+  → float(...) → ValueError
+  ```
+
+  The list is not empty, so validation passes. Conversion fails when `float()`
+  receives nonnumeric text.
+
+- Both tests use `assertRaises(ValueError)` to require the expected failure type.
+  Neither malformed path returns a `timedelta` object.
+- Both cases now produce the same exception type while failing at different
+  operations.
+
+### Red-to-Green Lesson
+
+- The first two malformed-data tests were characterization tests. They passed
+  while documenting the existing `IndexError` and `ValueError` behaviors.
+- I changed the empty-data test to require `ValueError`, specifying the clearer
+  behavior I wanted before changing production code.
+- The test entered the red stage because production still raised `IndexError`
+  when `[0]` was applied to an empty list.
+- I added the smallest production validation: store the split list, detect when
+  it is empty, and deliberately raise `ValueError`.
+- Rerunning all fourteen tests returned the suite to green while preserving
+  valid uptime parsing and all previously tested behavior.
+- The red result proved that the new requirement was detectable; the green
+  result provided evidence that the implementation satisfied it.
+
+### Corrections That Improved My Understanding
+
+- I initially described the normal successful path instead of substituting the
+  exact controlled malformed value into each operation.
+- `.split()` is a method call that returns a list. For empty text, that list is
+  `[]`.
+- `[0]` is an indexing operation. It succeeds only when the collection contains
+  a first element; applying it to `[]` raises `IndexError`.
+- `float(...)` is a function call because of its parentheses. It does not
+  require a colon to execute.
+- An empty-list failure occurs before `float()` and `timedelta()` are reached.
+- `if not uptime_parts` checks whether the list is empty; it does not check
+  whether the first element contains numeric text.
+- A passing characterization test documents current behavior without proving
+  that the behavior is the desired public contract.
+
+### Repetition Queue
+
+- Practice substituting the exact controlled input into each operation instead
+  of describing only the normal successful path.
+- Repeatedly distinguish the list returned by `.split()` from an element
+  selected from that list.
+- Trace whether failure occurs during indexing, numeric conversion, or duration
+  construction.
+- Reinforce collection truthiness and the meaning of `if not uptime_parts`.
+- Distinguish characterization tests that record existing behavior from tests
+  that specify desired behavior.
+- Repeat the red-to-green cycle while identifying which hat is active:
+  production builder, test designer, debugger, or documenter.
+
+### Next Steps
+
+- Commit and publish the Checkpoint 05 journal entry.
+- Add automated coverage for `main()` report coordination and formatted output.
+- Decide how the command should present user-friendly system-data failures.
+- Explore additional uptime edge cases only when they support a defined
+  requirement.
+- Add automatic test execution on GitHub later in the project.
