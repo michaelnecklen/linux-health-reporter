@@ -267,3 +267,88 @@ understanding—not merely record completed commands.
 - Test controlled malformed uptime data and its failure behavior.
 - Expand automated coverage to report coordination and formatted output.
 - Add automatic test execution on GitHub later in the project.
+
+## Checkpoint 04 — Mock Interaction Verification
+
+**Checkpoint commit:** `3b91780`
+**Completed:** August 1, 2026
+
+### What I Changed
+
+- Strengthened the existing controlled uptime test without adding another test
+  method.
+- Captured the temporary mock object in the variable `mock_read_text`.
+- Stored the `timedelta` object returned by `get_uptime()` in the variable
+  `result`.
+- Kept the output assertion and added
+  `mock_read_text.assert_called_once_with()` to verify the file-reading
+  interaction.
+- Confirmed that all twelve automated tests still pass.
+
+### Output Verification Versus Interaction Verification
+
+- Output verification checks what a function returns. In this test,
+  `assertEqual()` compares the actual `result` with the expected
+  `timedelta(seconds=3661)` object.
+- Interaction verification checks how code used a dependency. In this test,
+  `assert_called_once_with()` confirms that the mocked `read_text()` method was
+  called exactly once with no arguments.
+- `assertEqual()` does not inspect the mock's call history, and
+  `assert_called_once_with()` does not verify the returned duration.
+- Using both assertions provides evidence about the function's result and its
+  interaction with the patched file-reading method.
+
+### Controlled Test Flow
+
+1. `patch()` temporarily replaces `health_report.Path.read_text` with a mock
+   object.
+2. `as mock_read_text` assigns that temporary mock object to the
+   `mock_read_text` variable.
+3. The mock's `return_value` is configured as the controlled string
+   `"3661.75 99999.00\n"`.
+4. `get_uptime()` calls the patched `read_text()` method and receives that
+   controlled string.
+5. The real production parsing logic converts the first string value into
+   `timedelta(seconds=3661)`.
+6. The variable `result` receives the `timedelta` object returned by
+   `get_uptime()`.
+7. `assertEqual()` verifies the output, and `assert_called_once_with()` verifies
+   the mock's recorded interaction.
+8. When execution exits the `with patch(...):` block, the real
+   `Path.read_text()` method is restored automatically.
+
+### Debugging Lesson
+
+- While reviewing the unstaged diff, I found the misspelled method name
+  `asset_called_once_with()` instead of `assert_called_once_with()`.
+- The misspelling was valid Python syntax, so `py_compile` alone would not prove
+  that the named mock method existed.
+- `git diff` exposed the exact changed line before the file was staged.
+- After correcting the name, I reran `py_compile`, the complete twelve-test
+  suite, and `git diff --check`.
+- This reinforced that syntax checking, behavioral testing, change inspection,
+  and whitespace checking provide different kinds of evidence.
+
+### Repetition Queue
+
+- Repeatedly distinguish the temporary mock object, its configured
+  `return_value`, and the production function's returned `result`.
+- Practice separating output assertions from interaction assertions.
+- Remember that `assert_called_once_with()` inspects recorded calls; it does not
+  verify the production function's returned value.
+- Identify the exact boundary of a `with patch(...):` block and when restoration
+  occurs.
+- Continue tracing tests as arrangement, production action, output assertion,
+  interaction assertion, and cleanup.
+- Use runtime tests and diffs to catch valid-syntax mistakes that `py_compile`
+  cannot detect.
+
+### Next Steps
+
+- Commit and publish the Checkpoint 04 journal entry.
+- Test controlled malformed uptime text and document the current failure
+  behavior.
+- Decide whether malformed uptime data requires clearer production validation
+  and error messages.
+- Expand automated coverage to report coordination and formatted output.
+- Add automatic test execution on GitHub later in the project.
