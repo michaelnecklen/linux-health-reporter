@@ -16,6 +16,19 @@ class TestGetUptime(unittest.TestCase):
             self.assertEqual(result, timedelta(seconds=3661))
             mock_read_text.assert_called_once_with()
 
+    def test_empty_uptime_text_raises_value_error(self):
+        with patch("health_report.Path.read_text", return_value=""):
+            with self.assertRaises(ValueError):
+                get_uptime()
+
+    def test_nonnumeric_uptime_text_raises_value_error(self):
+        with patch(
+            "health_report.Path.read_text",
+            return_value="not-a-number 99999.00\n",
+        ):
+            with self.assertRaises(ValueError):
+                get_uptime()
+
 
 class TestBytesToGib(unittest.TestCase):
     def test_zero_bytes_returns_zero_gib(self):

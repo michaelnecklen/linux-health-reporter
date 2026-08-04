@@ -14,15 +14,15 @@ operations using only the Python standard library.
 
 - Reports the system hostname.
 - Displays the Linux kernel and Python versions.
-- Reads and formats system uptime from `/proc/uptime`.
+- Reads, validates, and formats system uptime from `/proc/uptime`.
 - Reports total, used, and available space for the root filesystem in GiB.
 - Calculates root-filesystem utilization as a percentage.
 - Classifies utilization as `OK`, `WARNING`, or `CRITICAL`.
 - Runs safely as a script without producing report output when imported.
 - Requires no third-party Python packages.
 - Rejects disk-percentage values outside the valid 0–100 range.
-- Includes automated tests for controlled uptime parsing, conversion, thresholds,
-  boundaries, and invalid values.
+- Includes automated tests for controlled and malformed uptime data, conversion,
+  thresholds, boundaries, and invalid values.
 
 ## Example Output
 
@@ -105,7 +105,8 @@ linux-health-reporter/
 ## How It Works
 
 1. `socket`, `platform`, `/proc/uptime`, and `shutil` provide raw system data.
-2. `get_uptime()` converts raw uptime seconds into a readable duration.
+2. `get_uptime()` validates raw uptime text and converts its seconds into a
+   readable duration.
 3. `bytes_to_gib()` converts filesystem byte counts into GiB.
 4. The program calculates root-filesystem utilization as a percentage.
 5. `get_disk_status()` validates the percentage and classifies it using ordered
@@ -148,6 +149,8 @@ python -m unittest discover -s tests -v
 ## Current Limitations
 
 - The uptime implementation depends on Linux's `/proc/uptime`.
+- Malformed uptime data raises `ValueError`, but the command does not yet present
+  a user-friendly failure message.
 - Only the filesystem mounted at `/` is reported.
 - Status thresholds are currently fixed at 80% and 90%.
 - The program currently prints text only and has no command-line options,
@@ -157,8 +160,8 @@ python -m unittest discover -s tests -v
 
 ## Roadmap
 
-- Expand automated coverage to report coordination and system-data failure
-  paths.
+- Expand automated coverage to report coordination and additional system-data
+  failure paths.
 - Add command-line options for filesystem paths and custom thresholds.
 - Add structured output such as JSON for use by other tools.
 - Return meaningful process exit codes for monitoring and automation.

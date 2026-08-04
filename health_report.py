@@ -4,9 +4,15 @@ import platform
 import shutil
 import socket
 
+
 def get_uptime():
     uptime_text = Path("/proc/uptime").read_text()
-    uptime_seconds = float(uptime_text.split()[0])
+    uptime_parts = uptime_text.split()
+
+    if not uptime_parts:
+        raise ValueError("invalid uptime data")
+
+    uptime_seconds = float(uptime_parts[0])
     return timedelta(seconds=int(uptime_seconds))
 
 
