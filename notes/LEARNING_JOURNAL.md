@@ -450,3 +450,145 @@ understanding—not merely record completed commands.
 - Explore additional uptime edge cases only when they support a defined
   requirement.
 - Add automatic test execution on GitHub later in the project.
+
+## Checkpoint 06 — Controlled Report Coordination and Output Testing
+
+**Checkpoint commit:** `ea6c199`
+**Completed:** August 7, 2026
+
+### What I Built
+
+- Added `TestMain` and `test_main_displays_controlled_report()` to exercise the
+  production `main()` function with controlled system data.
+- Patched hostname, kernel version, Python version, uptime, and root-filesystem
+  usage so the test does not depend on Serval's changing live state.
+- Used a `SimpleNamespace` object to imitate the disk-usage result and provide
+  controlled `total`, `used`, and `free` attributes.
+- Captured the complete printed report using `StringIO` and `redirect_stdout`.
+- Compared the actual output with one exact expected report string.
+- Verified that `get_uptime()` was called once with no arguments and that
+  `disk_usage()` was called once with `"/"`.
+- Increased the suite from fourteen to fifteen passing tests without changing
+  production code.
+- Updated the public README to document report-coordination and exact-output
+  coverage.
+
+### Controlled System Data
+
+- `socket.gethostname()` returns the controlled hostname `"test-host"`.
+- `platform.release()` returns the controlled kernel version `"test-kernel"`.
+- `platform.python_version()` returns the controlled version `"3.12.3"`.
+- `get_uptime()` returns `timedelta(seconds=3661)`, which is displayed as
+  `1:01:01`.
+- `shutil.disk_usage("/")` returns the controlled `disk` object rather than
+  reading Serval's live root-filesystem usage.
+- `gibibyte = 1024 ** 3` constructs exact byte counts that the production
+  `bytes_to_gib()` function converts back into 10.0, 2.0, and 8.0 GiB.
+- Production code calculates utilization from the controlled values:
+
+  ```text
+  2 / (2 + 8) × 100 = 20.0%
+  ```
+- A utilization value of 20.0% produces the controlled status OK.
+- Static inputs make the expected report deterministic while still exercising
+  the real coordination, calculation, classification, formatting, and printing
+  logic inside main().
+
+
+### Capturing and Verifying Standard Output
+
+- `StringIO()` creates an empty file-like text buffer in memory, assigned to the
+  variable `output`.
+- `redirect_stdout(output)` temporarily redirects standard output from the
+  terminal into that buffer.
+- While the redirect is active, every `print()` call inside `main()` writes its
+  text and newline characters into `output`.
+- When `main()` finishes, `output.getvalue()` returns the complete captured
+  report as one string.
+- `repr(...)` was useful in the REPL because it displayed invisible newline
+  characters as `\n`.
+- `assertIn()` checks whether a smaller string occurs somewhere within a larger
+  string, while `assertEqual()` requires the entire actual and expected strings
+  to match.
+- The exact comparison verifies headings, labels, controlled values, spacing,
+  decimal formatting, blank lines, and newline placement.
+- Normal terminal output is restored automatically when execution exits the
+  `with (...)` block.
+
+### Coordination Verification
+
+- `as mock_get_uptime` assigns the temporary mock object to
+  `mock_get_uptime`; it does not assign the configured `timedelta` return value.
+- `as mock_disk_usage` assigns another temporary mock object to
+  `mock_disk_usage`; it does not assign the controlled `disk` data object.
+- `mock_get_uptime.assert_called_once_with()` verifies that production `main()`
+  called `get_uptime()` exactly once with no arguments.
+- `mock_disk_usage.assert_called_once_with("/")` verifies that `main()` called
+  `shutil.disk_usage()` exactly once with the root path `"/"`.
+- The first assertion has empty parentheses because the expected production call
+  contains no arguments.
+- `"/"` is quoted because it is a Python string representing a filesystem path;
+  the call does not invoke Bash.
+- Interaction assertions inspect recorded dependency calls; they do not verify
+  printed output.
+- The output `assertEqual()` verifies the complete report but does not inspect
+  dependency call counts or arguments.
+- When the `with (...)` block exits, the real dependencies are restored. The
+  mock variables still refer to the temporary mock objects, so their recorded
+  call histories remain available for verification.
+
+### Debugging Lessons
+
+- The first output assertion failed because its expected hostname text contained
+  incorrect wording and an extra closing parenthesis.
+- A later `NameError` exposed inconsistent spelling between `gigibyte` and
+  `gibibyte`.
+- The REPL exercise exposed the misspelled name `redirect_stout` and required an
+  indented body beneath the `with` statement.
+- `py_compile` later verified the test file's syntax, but a valid-syntax
+  misspelled name may remain undetected until Python executes that line.
+- Exact-output testing made spaces, newline characters, punctuation, and labels
+  part of the specified behavior rather than merely visual details.
+- While adding interaction verification, I accidentally placed `TestMain`
+  patches and assertions inside `TestGetUptime`.
+- The misplaced code produced syntax and indentation errors and also damaged the
+  nonnumeric-uptime test arrangement.
+- Inspecting the file with `nl -ba` identified the exact damaged section.
+  Replacing that complete section was safer than continuing to patch individual
+  broken lines.
+- I first restored the known-good fifteen-test state and then reapplied each mock
+  capture and interaction assertion one small step at a time.
+- `py_compile`, the complete test suite, `git diff --check`, and `git diff`
+  provided different evidence during recovery.
+- The recovery preserved the new `TestMain` work and resulted in fifteen passing
+  tests without changing production code.
+
+### Repetition Queue
+
+- Repeatedly distinguish a temporary mock object from its configured
+  `return_value`.
+- Trace controlled data from arrangement through production calculation,
+  formatting, printing, capture, and assertion.
+- Practice using `StringIO`, `redirect_stdout`, and `output.getvalue()` in a
+  smaller program containing fewer dependencies.
+- Distinguish exact-output assertions from interaction assertions that inspect
+  call counts and arguments.
+- Practice reading parenthesized `with` statements containing multiple context
+  managers.
+- Reinforce that `"/"` is a Python filesystem-path string, not a Bash command.
+- Continue using line-numbered inspection and complete-block replacement when
+  indentation damage makes individual edits unreliable.
+- Rebuild these concepts later in smaller programs so recognition becomes
+  independent understanding.
+
+### Next Steps
+
+- Commit and publish the Checkpoint 06 journal entry.
+- Treat this commit as the completion of the project's foundational testing
+  phase.
+- Build small reinforcement programs that isolate conversion, validation,
+  file-reading mocks, output capture, and interaction verification.
+- Return to `linux-health-reporter` later with stronger pattern recognition.
+- Consider user-friendly system-data errors and meaningful process exit codes
+  as the next focused production feature.
+- Add automatic test execution on GitHub during a later project phase.
