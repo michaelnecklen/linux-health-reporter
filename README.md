@@ -22,7 +22,7 @@ operations using only the Python standard library.
 - Requires no third-party Python packages.
 - Rejects disk-percentage values outside the valid 0–100 range.
 - Includes automated tests for controlled and malformed uptime data, conversion,
-  thresholds, boundaries, and invalid values.
+  thresholds, boundaries, report coordination, and exact formatted output.
 
 ## Example Output
 
@@ -160,8 +160,7 @@ python -m unittest discover -s tests -v
 
 ## Roadmap
 
-- Expand automated coverage to report coordination and additional system-data
-  failure paths.
+- Expand automated coverage to additional system-data failure paths.
 - Add command-line options for filesystem paths and custom thresholds.
 - Add structured output such as JSON for use by other tools.
 - Return meaningful process exit codes for monitoring and automation.

@@ -1,8 +1,68 @@
-from datetime import timedelta
 import unittest
+from contextlib import redirect_stdout
+from datetime import timedelta
+from io import StringIO
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from health_report import bytes_to_gib, get_disk_status, get_uptime
+from health_report import bytes_to_gib, get_disk_status, get_uptime, main
+
+
+class TestMain(unittest.TestCase):
+    def test_main_displays_controlled_report(self):
+        gibibyte = 1024 ** 3
+        disk = SimpleNamespace(
+            total=10 * gibibyte,
+            used=2 * gibibyte,
+            free=8 * gibibyte,
+        )
+        output = StringIO()
+
+        with (
+            patch(
+                "health_report.socket.gethostname",
+                return_value="test-host",
+            ),
+            patch(
+                "health_report.platform.release",
+                return_value="test-kernel",
+            ),
+            patch(
+                "health_report.platform.python_version",
+                return_value="3.12.3",
+            ),
+            patch(
+                "health_report.get_uptime",
+                return_value=timedelta(seconds=3661),
+            ) as mock_get_uptime,
+            patch(
+                "health_report.shutil.disk_usage",
+                return_value=disk,
+            ) as mock_disk_usage,
+            redirect_stdout(output),
+        ):
+            main()
+
+        expected = (
+            "Linux System Health Report\n"
+            "==========================\n"
+            "Hostname:  test-host\n"
+            "Kernel:    test-kernel\n"
+            "Python:    3.12.3\n"
+            "Uptime:    1:01:01\n"
+            "\n"
+            "Root Filesystem\n"
+            "---------------\n"
+            "Total:        10.0 GiB\n"
+            "Used:         2.0 GiB\n"
+            "Available:    8.0 GiB\n"
+            "Utilized:     20.0%\n"
+            "Status:       OK\n"
+        )
+
+        self.assertEqual(output.getvalue(), expected)
+        mock_get_uptime.assert_called_once_with()
+        mock_disk_usage.assert_called_once_with("/")
 
 
 class TestGetUptime(unittest.TestCase):
